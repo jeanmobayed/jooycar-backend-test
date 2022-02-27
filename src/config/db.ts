@@ -1,9 +1,9 @@
 const {
-  MONGODB_USER,
-  MONGODB_PASSWORD,
-  MONGODB_HOST,
-  MONGODB_LOCAL_PORT,
-  MONGODB_DATABASE,
+  DB_USER,
+  DB_PASSWORD,
+  DB_HOST,
+  DB_PORT,
+  DB_NAME,
 } = process.env;
 
-export const MONGODB_URL = `mongodb://${MONGODB_USER}:${MONGODB_PASSWORD}@${MONGODB_HOST}:${MONGODB_LOCAL_PORT}/${MONGODB_DATABASE}?authSource=admin`;
+export const MONGODB_URL = `mongodb://${DB_USER}:${DB_PASSWORD}@${DB_HOST}:${DB_PORT}/${DB_NAME}?authSource=admin`;

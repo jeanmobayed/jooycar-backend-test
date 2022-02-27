@@ -14,7 +14,7 @@
   },
   "scripts": {
     "build": "tsc",
-    "start": "concurrently \"tsc -w\" \"nodemon dist/js/app.js\""
+    "start": "concurrently -k \"tsc -w\" \"nodemon dist/js/app.js\""
   },
   "devDependencies": {
     "@types/cors": "^2.8.12",
