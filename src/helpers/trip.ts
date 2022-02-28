@@ -1,4 +1,4 @@
-import { TripsQueryFiltersAndOptions, TripQueryFilters, TripQueryOptions } from "../types/trip";
+import { TripsQueryFiltersAndOptions, TripQueryFilters, TripQueryOptions, Reading, Location } from "../types/trip";
 
 export const getTripsQueryFiltersAndOptions = (filters: any): TripsQueryFiltersAndOptions => {
     
@@ -18,27 +18,37 @@ export const getTripsQueryFiltersAndOptions = (filters: any): TripsQueryFiltersA
     return {queryFilters, options};
 }
 
-export const getDistanceFromLatLonInKm = (
-    lat1: number,
-    lon1: number,
-    lat2: number,
-    lon2: number
-  ) => {
-    var R = 6371;
-    var dLat = deg2rad(lat2 - lat1);
-    var dLon = deg2rad(lon2 - lon1);
-    var a =
-      Math.sin(dLat / 2) * Math.sin(dLat / 2) +
-      Math.cos(deg2rad(lat1)) *
-        Math.cos(deg2rad(lat2)) *
-        Math.sin(dLon / 2) *
-        Math.sin(dLon / 2);
-    var c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
-    var d = R * c;
-    return d;
-  };
+export const getDistanceFromLatLonInKm = (lat1: number, lon1: number, lat2: number, lon2: number) => {
+  var R = 6371;
+  var dLat = deg2rad(lat2 - lat1);
+  var dLon = deg2rad(lon2 - lon1);
+  var a =
+    Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+    Math.cos(deg2rad(lat1)) *
+      Math.cos(deg2rad(lat2)) *
+      Math.sin(dLon / 2) *
+      Math.sin(dLon / 2);
+  var c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+  var d = R * c;
+  return d;
+};
   
-  function deg2rad(deg: number) {
-    return deg * (Math.PI / 180);
-  }
+function deg2rad(deg: number) {
+  return deg * (Math.PI / 180);
+}
   
+export const findBoundingBoxForGivenCoordinates = (readings: any) =>{
+  let west: number = 180;
+  let east: number = -180;
+  let north: number = -90;
+  let south: number = 90;
+
+  readings.forEach((reading: any) => {
+    north = Math.max(reading.location.lat, north)
+    south = Math.min(reading.location.lat, south)
+    west = Math.min(reading.location.lon, west)
+    east = Math.max(reading.location.lon, east)
+  });
+
+  return [{lat: south, lon: west}, {lat: north, lon: east}];
+}

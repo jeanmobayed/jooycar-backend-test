@@ -3,7 +3,11 @@ import nodeGeocoder, { OpenStreetMapOptions } from "node-geocoder";
 import { ITrip } from "../types/trip";
 import Trip from "../models/trip";
 import { Reading } from "../types/trip";
-import { getTripsQueryFiltersAndOptions, getDistanceFromLatLonInKm } from "../helpers/trip";
+import {
+  getTripsQueryFiltersAndOptions,
+  getDistanceFromLatLonInKm,
+  findBoundingBoxForGivenCoordinates,
+} from "../helpers/trip";
 
 const options: OpenStreetMapOptions = {
   provider: "openstreetmap",
@@ -32,21 +36,6 @@ const createTrip = async (req: Request, res: Response): Promise<void> => {
         error: "There must be at least 5 readings to create a new Trip.",
       });
 
-    const sortedReadings = readings.sort((a: any, b: any) => a.time - b.time);
-
-    const startReading = sortedReadings[0];
-    const endReading = sortedReadings[sortedReadings.length - 1];
-
-    const startReadingAdDressPromise = geoCoder.reverse({
-      lat: startReading.location.lat,
-      lon: startReading.location.lon,
-    });
-
-    const endReadingAddressPromise = geoCoder.reverse({
-      lat: endReading.location.lat,
-      lon: endReading.location.lon,
-    });
-
     let previouslyOverspeed: boolean = false;
     let overspeedsCount: number = 0;
     let totalDistance: number = 0;
@@ -72,6 +61,21 @@ const createTrip = async (req: Request, res: Response): Promise<void> => {
         );
     });
 
+    const sortedReadings = readings.sort((a: any, b: any) => a.time - b.time);
+
+    const startReading = sortedReadings[0];
+    const endReading = sortedReadings[sortedReadings.length - 1];
+
+    const startReadingAdDressPromise = geoCoder.reverse({
+      lat: startReading.location.lat,
+      lon: startReading.location.lon,
+    });
+
+    const endReadingAddressPromise = geoCoder.reverse({
+      lat: endReading.location.lat,
+      lon: endReading.location.lon,
+    });
+
     const [startReadingAddress, endReadingAddress] = await Promise.all([
       startReadingAdDressPromise,
       endReadingAddressPromise,
@@ -93,7 +97,7 @@ const createTrip = async (req: Request, res: Response): Promise<void> => {
       distance: Math.round((totalDistance + Number.EPSILON) * 100) / 100,
       duration: endReading.time - startReading.time,
       overspeedsCount,
-      boundingBox: [],
+      boundingBox: findBoundingBoxForGivenCoordinates(sortedReadings),
     });
 
     const newTrip: ITrip = await trip.save();
