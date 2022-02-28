@@ -32,9 +32,7 @@ const createTrip = async (req: Request, res: Response): Promise<void> => {
     const readings = req.body.readings as Reading[];
 
     if (readings.length < 5)
-      res.status(422).send({
-        error: "There must be at least 5 readings to create a new Trip.",
-      });
+      throw {status: 422 , message: "There must be at least 5 readings to create a new Trip."};
 
     let previouslyOverspeed: boolean = false;
     let overspeedsCount: number = 0;
@@ -42,9 +40,7 @@ const createTrip = async (req: Request, res: Response): Promise<void> => {
 
     readings.forEach((reading, index) => {
       if (!reading.time)
-        res
-          .status(422)
-          .send({ error: "Each reading must have a 'time' property." });
+        throw {status: 422 , message: "Each reading must have a 'time' property."};
 
       let isCurrentlyOverspeed = reading.speed > reading.speedLimit;
 
@@ -103,8 +99,8 @@ const createTrip = async (req: Request, res: Response): Promise<void> => {
     const newTrip: ITrip = await trip.save();
 
     res.status(200).json(newTrip);
-  } catch (error) {
-    throw error;
+  } catch (error: any) {
+    res.status(error.status).json({"error": error.message});
   }
 };
 
